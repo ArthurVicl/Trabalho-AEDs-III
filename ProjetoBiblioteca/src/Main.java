@@ -4,10 +4,8 @@ public class Main {
         
         try {
             // Instancia o menu que criamos anteriormente
-            MenuLivros menu = new MenuLivros();
-            
-            // Chama a função que exibe as opções no console
-            menu.menu();
+           Menu menu = new Menu();
+           menu.menu();
             
         } catch (Exception e) {
             System.err.println("Erro crítico ao iniciar o sistema: " + e.getMessage());
