@@ -119,24 +119,46 @@ public class Menu {
         }
     }
 
-    private void inserirLivro() throws Exception {
+   private void inserirLivro() throws Exception {
 
-        System.out.print("Título do Livro: ");
-        String titulo = console.nextLine();
+    System.out.print("Título do Livro: ");
+    String titulo = console.nextLine();
 
-        System.out.print("Autor do Livro: ");
-        String autor = console.nextLine();
+    System.out.print("ID do Autor: ");
+    int idAutor = Integer.parseInt(console.nextLine());
 
-        System.out.print("Preço: ");
-        float preco = Float.parseFloat(console.nextLine());
+    Autor autor = autorDAO.read(idAutor);
 
-        Livro livro = new Livro(titulo, autor, preco);
-
-        int id = livroDAO.create(livro);
-
-        System.out.println("Livro inserido com sucesso! ID: " + id);
+    if (autor == null) {
+        System.out.println("Autor não encontrado. Livro não cadastrado.");
+        return;
     }
 
+    System.out.print("Data de Publicação: ");
+    String dataPublicacao = console.nextLine();
+
+    System.out.print("Categorias: ");
+    String categorias = console.nextLine();
+
+    System.out.print("Avaliação: ");
+    float avaliacao = Float.parseFloat(console.nextLine());
+
+    System.out.print("Preço: ");
+    float preco = Float.parseFloat(console.nextLine());
+
+    Livro livro = new Livro(
+        titulo,
+        idAutor,
+        dataPublicacao,
+        categorias,
+        avaliacao,
+        preco
+    );
+
+    int id = livroDAO.create(livro);
+
+    System.out.println("Livro inserido com sucesso! ID: " + id);
+}
     private void buscarLivro() throws Exception {
 
         System.out.print("Digite o ID do Livro: ");
@@ -152,33 +174,52 @@ public class Menu {
 
     private void atualizarLivro() throws Exception {
 
-        System.out.print("Digite o ID do Livro: ");
-        int id = Integer.parseInt(console.nextLine());
+    System.out.print("Digite o ID do Livro: ");
+    int id = Integer.parseInt(console.nextLine());
 
-        Livro livro = livroDAO.read(id);
+    Livro livro = livroDAO.read(id);
 
-        if (livro != null) {
+    if (livro != null) {
 
-            System.out.print("Novo Título: ");
-            String titulo = console.nextLine();
+        System.out.print("Novo Título: ");
+        livro.setTitulo(console.nextLine());
 
-            System.out.print("Novo Autor: ");
-            String autor = console.nextLine();
+        System.out.print("Novo ID do Autor: ");
+        int idAutor = Integer.parseInt(console.nextLine());
 
-            System.out.print("Novo Preço: ");
-            float preco = Float.parseFloat(console.nextLine());
+        Autor autor = autorDAO.read(idAutor);
 
-            livro.setTitulo(titulo);
-            livro.setAutor(autor);
-            livro.setPreco(preco);
-
-            if (livroDAO.update(livro))
-                System.out.println("Livro atualizado com sucesso!");
-
-        } else {
-            System.out.println("Livro não encontrado.");
+        if (autor == null) {
+            System.out.println("Autor não encontrado. Livro não atualizado.");
+            return;
         }
+
+        livro.setIdAutor(idAutor);
+
+        System.out.print("Nova Data de Publicação: ");
+        livro.setDataPublicacao(console.nextLine());
+
+        System.out.print("Novas Categorias: ");
+        livro.setCategorias(console.nextLine());
+
+        System.out.print("Nova Avaliação: ");
+        livro.setAvaliacao(
+            Float.parseFloat(console.nextLine())
+        );
+
+        System.out.print("Novo Preço: ");
+        livro.setPreco(
+            Float.parseFloat(console.nextLine())
+        );
+
+        if (livroDAO.update(livro)) {
+            System.out.println("Livro atualizado com sucesso!");
+        }
+
+    } else {
+        System.out.println("Livro não encontrado.");
     }
+}
 
     private void excluirLivro() throws Exception {
 
@@ -478,34 +519,51 @@ public class Menu {
 
     private void inserirEmprestimo() throws Exception {
 
-        System.out.print("ID do Usuário: ");
-        int idUsuario = Integer.parseInt(console.nextLine());
+    System.out.print("ID do Usuário: ");
+    int idUsuario = Integer.parseInt(console.nextLine());
 
-        System.out.print("ID do Livro: ");
-        int idLivro = Integer.parseInt(console.nextLine());
+    // Verifica se o usuário existe
+    Usuario usuario = usuarioDAO.read(idUsuario);
 
-        System.out.print("Data do Empréstimo: ");
-        String dataEmprestimo = console.nextLine();
-
-        System.out.print("Data da Devolução: ");
-        String dataDevolucao = console.nextLine();
-
-        System.out.print("Valor da Multa: ");
-        float valorMulta = Float.parseFloat(console.nextLine());
-
-        Emprestimo emprestimo =
-            new Emprestimo(
-                idUsuario,
-                idLivro,
-                dataEmprestimo,
-                dataDevolucao,
-                valorMulta
-            );
-
-        int id = emprestimoDAO.create(emprestimo);
-
-        System.out.println("Empréstimo inserido! ID: " + id);
+    if (usuario == null) {
+        System.out.println("Usuário não encontrado. Empréstimo não realizado.");
+        return;
     }
+
+    System.out.print("ID do Livro: ");
+    int idLivro = Integer.parseInt(console.nextLine());
+
+    // Verifica se o livro existe
+    Livro livro = livroDAO.read(idLivro);
+
+    if (livro == null) {
+        System.out.println("Livro não encontrado. Empréstimo não realizado.");
+        return;
+    }
+
+    System.out.print("Data do Empréstimo: ");
+    String dataEmprestimo = console.nextLine();
+
+    System.out.print("Data da Devolução: ");
+    String dataDevolucao = console.nextLine();
+
+    System.out.print("Valor da Multa: ");
+    float valorMulta = Float.parseFloat(console.nextLine());
+
+    Emprestimo emprestimo = new Emprestimo(
+        idUsuario,
+        idLivro,
+        dataEmprestimo,
+        dataDevolucao,
+        valorMulta
+    );
+
+    int id = emprestimoDAO.create(emprestimo);
+
+    System.out.println(
+        "Empréstimo realizado com sucesso! ID: " + id
+    );
+}
 
     private void buscarEmprestimo() throws Exception {
 
