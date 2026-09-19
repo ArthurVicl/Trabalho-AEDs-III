@@ -1,5 +1,5 @@
+import java.util.List;
 import java.util.Scanner;
-import java.io.IOException;
 
 
 public class Menu {
@@ -87,6 +87,7 @@ public class Menu {
             System.out.println("2 - Buscar Livro por ID");
             System.out.println("3 - Atualizar Livro");
             System.out.println("4 - Excluir Livro");
+            System.out.println("5 - Listar Livros por ID do Autor (Árvore B+)");
             System.out.println("0 - Voltar");
             System.out.print("Escolha uma opção: ");
 
@@ -108,6 +109,10 @@ public class Menu {
 
                 case 4:
                     excluirLivro();
+                    break;
+
+                case 5: 
+                    listarLivrosPorAutor();
                     break;
 
                 case 0:
@@ -232,6 +237,22 @@ public class Menu {
             System.out.println("Livro não encontrado.");
     }
 
+    private void listarLivrosPorAutor() throws Exception {
+        System.out.print("Digite o ID do Autor: ");
+        int idAutor = Integer.parseInt(console.nextLine());
+
+        List<Livro> livros = livroDAO.readByAutor(idAutor);
+
+        if (livros == null || livros.isEmpty()) {
+            System.out.println("Nenhum livro encontrado para o Autor de ID " + idAutor + ".");
+        } else {
+            System.out.println("\n--- Livros Encontrados (Autor " + idAutor + ") ---");
+            for (Livro livro : livros) {
+                System.out.println(livro);
+            }
+        }
+    }
+
     // =====================================================
     // USUÁRIOS
     // =====================================================
@@ -247,6 +268,7 @@ public class Menu {
             System.out.println("2 - Buscar Usuário por ID");
             System.out.println("3 - Atualizar Usuário");
             System.out.println("4 - Excluir Usuário");
+            System.out.println("5 - Ordenar Usuários por Nome (Ordenação Externa)");
             System.out.println("0 - Voltar");
             System.out.print("Escolha uma opção: ");
 
@@ -268,6 +290,10 @@ public class Menu {
 
                 case 4:
                     excluirUsuario();
+                    break;
+
+                case 5:
+                    OrdenacaoExterna();
                     break;
 
                 case 0:
@@ -352,6 +378,16 @@ public class Menu {
             System.out.println("Usuário excluído!");
         else
             System.out.println("Usuário não encontrado.");
+    }
+
+    private void OrdenacaoExterna() {
+        try {
+            System.out.println("\nA iniciar o processo de intercalação balanceada...");
+            OrdenacaoExternaUsuario ordenacao = new OrdenacaoExternaUsuario();
+            ordenacao.ordenarPorNome();
+        } catch (Exception e) {
+            System.out.println("Erro ao realizar a ordenação externa: " + e.getMessage());
+        }
     }
 
     // =====================================================
