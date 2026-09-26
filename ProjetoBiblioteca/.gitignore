@@ -1,0 +1,8 @@
+bin/
+dados/
+src/dados/
+*.class
+*.db
+*.btree
+*.hash
+*.dir

@@ -3,9 +3,8 @@ public class Main {
         System.out.println("Iniciando o Sistema de Gerenciamento da Biblioteca...");
         
         try {
-            // Instancia o menu que criamos anteriormente
-           Menu menu = new Menu();
-           menu.menu();
+            MenuGUI menuGui = new MenuGUI();
+            menuGui.setVisible(true);
             
         } catch (Exception e) {
             System.err.println("Erro crítico ao iniciar o sistema: " + e.getMessage());
