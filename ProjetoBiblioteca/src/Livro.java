@@ -8,19 +8,17 @@ public class Livro implements Registro {
 
     private int id;
     private String titulo;
-    private int idAutor;
     private String dataPublicacao;
     private String categorias;
     private float avaliacao;
     private float preco;
 
     public Livro() {
-        this(-1, "", -1, "", "", 0F, 0F);
+        this(-1, "", "", "", 0F, 0F);
     }
 
     public Livro(
         String titulo,
-        int idAutor,
         String dataPublicacao,
         String categorias,
         float avaliacao,
@@ -29,7 +27,6 @@ public class Livro implements Registro {
         this(
             -1,
             titulo,
-            idAutor,
             dataPublicacao,
             categorias,
             avaliacao,
@@ -40,7 +37,6 @@ public class Livro implements Registro {
     public Livro(
         int id,
         String titulo,
-        int idAutor,
         String dataPublicacao,
         String categorias,
         float avaliacao,
@@ -48,7 +44,6 @@ public class Livro implements Registro {
     ) {
         this.id = id;
         this.titulo = titulo;
-        this.idAutor = idAutor;
         this.dataPublicacao = dataPublicacao;
         this.categorias = categorias;
         this.avaliacao = avaliacao;
@@ -71,14 +66,6 @@ public class Livro implements Registro {
 
     public void setTitulo(String titulo) {
         this.titulo = titulo;
-    }
-
-    public int getIdAutor() {
-        return idAutor;
-    }
-
-    public void setIdAutor(int idAutor) {
-        this.idAutor = idAutor;
     }
 
     public String getDataPublicacao() {
@@ -121,7 +108,6 @@ public class Livro implements Registro {
 
         dos.writeInt(id);
         dos.writeUTF(titulo);
-        dos.writeInt(idAutor);
         dos.writeUTF(dataPublicacao);
         dos.writeUTF(categorias);
         dos.writeFloat(avaliacao);
@@ -138,7 +124,6 @@ public class Livro implements Registro {
 
         id = dis.readInt();
         titulo = dis.readUTF();
-        idAutor = dis.readInt();
         dataPublicacao = dis.readUTF();
         categorias = dis.readUTF();
         avaliacao = dis.readFloat();
@@ -150,7 +135,6 @@ public class Livro implements Registro {
 
         return "ID: " + id
             + " | Título: " + titulo
-            + " | ID Autor: " + idAutor
             + " | Data Publicação: " + dataPublicacao
             + " | Categorias: " + categorias
             + " | Avaliação: " + avaliacao

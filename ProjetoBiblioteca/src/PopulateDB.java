@@ -14,10 +14,18 @@ public class PopulateDB {
             int idMachado = autorDAO.create(new Autor("Machado de Assis", "21/06/1839", "Brasileiro"));
             
             // Inserir Livros
-            int idSenhor = livroDAO.create(new Livro("O Senhor dos Anéis: A Sociedade do Anel", idJRR, "29/07/1954", "Fantasia, Aventura", 4.9f, 60.50f));
-            int idHobbit = livroDAO.create(new Livro("O Hobbit", idJRR, "21/09/1937", "Fantasia, Aventura", 4.8f, 45.00f));
-            int idHarry = livroDAO.create(new Livro("Harry Potter e a Pedra Filosofal", idJK, "26/06/1997", "Fantasia, Magia", 4.7f, 35.90f));
-            int idBras = livroDAO.create(new Livro("Memórias Póstumas de Brás Cubas", idMachado, "01/01/1881", "Ficção, Romance", 4.9f, 25.00f));
+            AutoriaDAO autoriaDAO = new AutoriaDAO();
+            int idSenhor = livroDAO.create(new Livro("O Senhor dos Anéis: A Sociedade do Anel", "29/07/1954", "Fantasia, Aventura", 4.9f, 60.50f));
+            autoriaDAO.create(idJRR, idSenhor);
+            
+            int idHobbit = livroDAO.create(new Livro("O Hobbit", "21/09/1937", "Fantasia, Aventura", 4.8f, 45.00f));
+            autoriaDAO.create(idJRR, idHobbit);
+            
+            int idHarry = livroDAO.create(new Livro("Harry Potter e a Pedra Filosofal", "26/06/1997", "Fantasia, Magia", 4.7f, 35.90f));
+            autoriaDAO.create(idJK, idHarry);
+            
+            int idBras = livroDAO.create(new Livro("Memórias Póstumas de Brás Cubas", "01/01/1881", "Ficção, Romance", 4.9f, 25.00f));
+            autoriaDAO.create(idMachado, idBras);
             
             // Inserir Usuários
             int idJoao = usuarioDAO.create(new Usuario("João Silva", "111.111.111-11", "joao@email.com", "(11) 91111-1111"));
