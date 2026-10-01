@@ -8,6 +8,7 @@ public class MenuGUI extends JFrame {
     private UsuarioDAO usuarioDAO;
     private AutorDAO autorDAO;
     private EmprestimoDAO emprestimoDAO;
+    private AutoriaDAO autoriaDAO;
 
     public MenuGUI() {
         try {
@@ -15,6 +16,7 @@ public class MenuGUI extends JFrame {
             usuarioDAO = new UsuarioDAO();
             autorDAO = new AutorDAO();
             emprestimoDAO = new EmprestimoDAO();
+            autoriaDAO = new AutoriaDAO();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro ao inicializar o banco de dados: " + e.getMessage(), "Erro Crítico", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
@@ -134,8 +136,9 @@ public class MenuGUI extends JFrame {
                     if (precoStr == null || precoStr.trim().isEmpty()) return;
                     float preco = Float.parseFloat(precoStr);
                     
-                    Livro livro = new Livro(titulo, idAutor, dataPub, categorias, avaliacao, preco);
+                    Livro livro = new Livro(titulo, dataPub, categorias, avaliacao, preco);
                     int id = livroDAO.create(livro);
+                    autoriaDAO.create(idAutor, id);
                     JOptionPane.showMessageDialog(this, "Livro inserido com sucesso! ID: " + id);
                     break;
 
@@ -156,15 +159,6 @@ public class MenuGUI extends JFrame {
                             String novoTitulo = JOptionPane.showInputDialog("Novo Título:", l.getTitulo());
                             if (novoTitulo == null) return;
                             l.setTitulo(novoTitulo);
-
-                            String novoIdAutorStr = JOptionPane.showInputDialog("Novo ID do Autor:", l.getIdAutor());
-                            if (novoIdAutorStr == null) return;
-                            int novoIdAutor = Integer.parseInt(novoIdAutorStr);
-                            if (autorDAO.read(novoIdAutor) == null) {
-                                JOptionPane.showMessageDialog(this, "Autor não encontrado!");
-                                return;
-                            }
-                            l.setIdAutor(novoIdAutor);
 
                             l.setDataPublicacao(JOptionPane.showInputDialog("Nova Data de Publicação:", l.getDataPublicacao()));
                             l.setCategorias(JOptionPane.showInputDialog("Novas Categorias:", l.getCategorias()));
@@ -191,7 +185,7 @@ public class MenuGUI extends JFrame {
                 case 4: // Listar por Autor
                     String idAut = JOptionPane.showInputDialog("ID do Autor:");
                     if (idAut != null) {
-                        List<Livro> livros = livroDAO.readByAutor(Integer.parseInt(idAut));
+                        List<Livro> livros = autoriaDAO.readLivrosDoAutor(Integer.parseInt(idAut), livroDAO);
                         if (livros == null || livros.isEmpty()) {
                             JOptionPane.showMessageDialog(this, "Nenhum livro encontrado para o Autor ID " + idAut);
                         } else {

@@ -153,7 +153,6 @@ public class Menu {
 
     Livro livro = new Livro(
         titulo,
-        idAutor,
         dataPublicacao,
         categorias,
         avaliacao,
@@ -161,6 +160,7 @@ public class Menu {
     );
 
     int id = livroDAO.create(livro);
+    new AutoriaDAO().create(idAutor, id);
 
     System.out.println("Livro inserido com sucesso! ID: " + id);
 }
@@ -188,18 +188,6 @@ public class Menu {
 
         System.out.print("Novo Título: ");
         livro.setTitulo(console.nextLine());
-
-        System.out.print("Novo ID do Autor: ");
-        int idAutor = Integer.parseInt(console.nextLine());
-
-        Autor autor = autorDAO.read(idAutor);
-
-        if (autor == null) {
-            System.out.println("Autor não encontrado. Livro não atualizado.");
-            return;
-        }
-
-        livro.setIdAutor(idAutor);
 
         System.out.print("Nova Data de Publicação: ");
         livro.setDataPublicacao(console.nextLine());
@@ -241,7 +229,7 @@ public class Menu {
         System.out.print("Digite o ID do Autor: ");
         int idAutor = Integer.parseInt(console.nextLine());
 
-        List<Livro> livros = livroDAO.readByAutor(idAutor);
+        List<Livro> livros = new AutoriaDAO().readLivrosDoAutor(idAutor, livroDAO);
 
         if (livros == null || livros.isEmpty()) {
             System.out.println("Nenhum livro encontrado para o Autor de ID " + idAutor + ".");
