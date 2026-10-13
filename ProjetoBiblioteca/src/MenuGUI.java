@@ -100,7 +100,7 @@ public class MenuGUI extends JFrame {
     // LIVROS
     // =====================================================
     private void menuLivros() {
-        String[] opcoes = {"Adicionar Livro", "Buscar Livro", "Atualizar Livro", "Excluir Livro", "Listar por Autor", "Voltar"};
+        String[] opcoes = {"Adicionar Livro", "Buscar Livro", "Atualizar Livro", "Excluir Livro", "Listar por Autor", "Vincular Autor", "Desvincular Autor", "Voltar"};
         int escolha = JOptionPane.showOptionDialog(this, 
                 "Escolha uma opção para Livros:", "Gerenciar Livros", 
                 JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
@@ -111,16 +111,6 @@ public class MenuGUI extends JFrame {
                 case 0: // Adicionar
                     String titulo = JOptionPane.showInputDialog("Título do Livro:");
                     if (titulo == null || titulo.trim().isEmpty()) return;
-                    
-                    String idAutorStr = JOptionPane.showInputDialog("ID do Autor:");
-                    if (idAutorStr == null || idAutorStr.trim().isEmpty()) return;
-                    int idAutor = Integer.parseInt(idAutorStr);
-                    
-                    Autor autor = autorDAO.read(idAutor);
-                    if (autor == null) {
-                        JOptionPane.showMessageDialog(this, "Autor não encontrado!");
-                        return;
-                    }
                     
                     String dataPub = JOptionPane.showInputDialog("Data de Publicação:");
                     if (dataPub == null) return;
@@ -138,15 +128,15 @@ public class MenuGUI extends JFrame {
                     
                     Livro livro = new Livro(titulo, dataPub, categorias, avaliacao, preco);
                     int id = livroDAO.create(livro);
-                    autoriaDAO.create(idAutor, id);
-                    JOptionPane.showMessageDialog(this, "Livro inserido com sucesso! ID: " + id);
+                    JOptionPane.showMessageDialog(this, "Livro inserido com sucesso! ID: " + id
+                        + "\nUse \"Vincular Autor\" para associar autores.");
                     break;
 
                 case 1: // Buscar
                     String idBusca = JOptionPane.showInputDialog("ID do Livro:");
                     if (idBusca != null) {
                         Livro l = livroDAO.read(Integer.parseInt(idBusca));
-                        if (l != null) JOptionPane.showMessageDialog(this, l.toString());
+                        if (l != null) JOptionPane.showMessageDialog(this, l.toString() + "\nAutor(es): " + nomesAutores(l.getId()));
                         else JOptionPane.showMessageDialog(this, "Livro não encontrado.");
                     }
                     break;
@@ -175,7 +165,9 @@ public class MenuGUI extends JFrame {
                 case 3: // Excluir
                     String idExcluir = JOptionPane.showInputDialog("ID do Livro para excluir:");
                     if (idExcluir != null) {
-                        if (livroDAO.delete(Integer.parseInt(idExcluir)))
+                        int idLivroDel = Integer.parseInt(idExcluir);
+                        autoriaDAO.deleteAllFromLivro(idLivroDel);
+                        if (livroDAO.delete(idLivroDel))
                             JOptionPane.showMessageDialog(this, "Livro excluído com sucesso!");
                         else
                             JOptionPane.showMessageDialog(this, "Livro não encontrado.");
@@ -190,15 +182,59 @@ public class MenuGUI extends JFrame {
                             JOptionPane.showMessageDialog(this, "Nenhum livro encontrado para o Autor ID " + idAut);
                         } else {
                             StringBuilder sb = new StringBuilder("Livros do Autor:\n\n");
-                            for (Livro b : livros) sb.append(b.toString()).append("\n\n");
+                            for (Livro b : livros)
+                                sb.append(b.toString()).append("\nAutor(es): ").append(nomesAutores(b.getId())).append("\n\n");
                             JOptionPane.showMessageDialog(this, sb.toString());
                         }
+                    }
+                    break;
+
+                case 5: // Vincular Autor ao Livro
+                case 6: // Desvincular Autor do Livro
+                    boolean vincular = (escolha == 5);
+                    String idLivroVStr = JOptionPane.showInputDialog("ID do Livro:");
+                    if (idLivroVStr == null || idLivroVStr.trim().isEmpty()) return;
+                    int idLivroV = Integer.parseInt(idLivroVStr.trim());
+                    if (livroDAO.read(idLivroV) == null) {
+                        JOptionPane.showMessageDialog(this, "Livro não encontrado.");
+                        return;
+                    }
+
+                    String idAutorVStr = JOptionPane.showInputDialog("ID do Autor:");
+                    if (idAutorVStr == null || idAutorVStr.trim().isEmpty()) return;
+                    int idAutorV = Integer.parseInt(idAutorVStr.trim());
+                    if (autorDAO.read(idAutorV) == null) {
+                        JOptionPane.showMessageDialog(this, "Autor não encontrado.");
+                        return;
+                    }
+
+                    if (vincular) {
+                        if (autoriaDAO.create(idAutorV, idLivroV))
+                            JOptionPane.showMessageDialog(this, "Autor vinculado ao livro!");
+                        else
+                            JOptionPane.showMessageDialog(this, "Esse autor já está vinculado ao livro.");
+                    } else {
+                        if (autoriaDAO.delete(idAutorV, idLivroV))
+                            JOptionPane.showMessageDialog(this, "Autor desvinculado do livro!");
+                        else
+                            JOptionPane.showMessageDialog(this, "Vínculo não encontrado.");
                     }
                     break;
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private String nomesAutores(int idLivro) throws Exception {
+        List<Autor> autores = autoriaDAO.readAutoresDoLivro(idLivro, autorDAO);
+        if (autores.isEmpty()) return "Nenhum autor vinculado";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < autores.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(autores.get(i).getNome());
+        }
+        return sb.toString();
     }
 
     // =====================================================
@@ -327,7 +363,9 @@ public class MenuGUI extends JFrame {
                 case 3: // Excluir
                     String idExcluir = JOptionPane.showInputDialog("ID do Autor para excluir:");
                     if (idExcluir != null) {
-                        if (autorDAO.delete(Integer.parseInt(idExcluir)))
+                        int idAutorDel = Integer.parseInt(idExcluir);
+                        autoriaDAO.deleteAllFromAutor(idAutorDel);
+                        if (autorDAO.delete(idAutorDel))
                             JOptionPane.showMessageDialog(this, "Autor excluído!");
                         else
                             JOptionPane.showMessageDialog(this, "Autor não encontrado.");
@@ -425,4 +463,3 @@ public class MenuGUI extends JFrame {
         }
     }
 }
-
