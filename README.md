@@ -7,7 +7,7 @@ Trabalho Prático da disciplina de **Algoritmos e Estruturas de Dados III (AEDs 
 
 ## Sobre o Projeto
 
-O sistema é uma aplicação de gerenciamento de biblioteca desenvolvida em **Java** com interface gráfica **Swing**. O projeto implementa persistência de dados em arquivos binários próprios (com registro de tamanho variável, cabeçalho de controle e exclusão lógica por lápide), além de indexação por **Hashing Extensível** e **Árvores B+**.
+O sistema é uma aplicação de gerenciamento de biblioteca desenvolvida em **Java** com interface gráfica. O projeto implementa persistência de dados em arquivos binários próprios (com registro de tamanho variável, cabeçalho de controle e exclusão lógica por lápide), além de indexação por **Hashing Extensível** e **Árvores B+**.
 
 Na **Fase III**, foi implementado o relacionamento **N:N (Autoria)** entre `Autor` e `Livro`, com arquivo intermediário binário e indexação bidirecional por Árvores B+.
 
@@ -15,9 +15,9 @@ Na **Fase III**, foi implementado o relacionamento **N:N (Autoria)** entre `Auto
 
 ## Arquitetura e Estruturas de Dados
 
-- **Camada de Apresentação (GUI):** Interface gráfica desenvolvida em Java Swing (`MenuGUI.java`), sem uso de console.
+- **Camada de Apresentação (GUI):** Interface gráfica desenvolvida em Java Swing (`MenuGUI.java`).
 - **Camada de Negócio / DAOs:** `LivroDAO`, `AutorDAO`, `UsuarioDAO`, `EmprestimoDAO` e `AutoriaDAO`.
-- **Camada de Persistência:** Classe genérica `Arquivo<T>` que gerencia a escrita e leitura binária com reaproveitamento de espaço via lista de registros excluídos.
+- **Camada de Persistência:** Classe genérica `Arquivo<T>` que gerencia a escrita e leitura binária com reaproveitamento de espaço pela lista de registros excluídos.
 - **Indexação Primária:** **Hashing Extensível** (`HashExtensivel.java`) com arquivos de diretório (`.dir`) e cestos (`.hash`).
 - **Indexação Secundária / Relacionamento N:N:** **Árvores B+** (`ArvoreBPlus.java`) mantidas em memória secundária (`.btree`):
   - `indice_autoria_autor_livro`: Chave = `idAutor`, Valor = `idAutoria`
@@ -34,13 +34,13 @@ Na **Fase III**, foi implementado o relacionamento **N:N (Autoria)** entre `Auto
 
 ## Instruções de Execução
 
-### Opção 1: Sem usar o terminal (Via IDE)
+### Opção 1: Sem usar o terminal (IDE)
 
 #### No Visual Studio Code (VS Code):
 1. Abra a pasta `Trabalho-AEDs-III` no VS Code.
 2. Certifique-se de que a extensão oficial **Extension Pack for Java** está instalada.
-3. No explorador de arquivos, navegue até a pasta `ProjetoBiblioteca/src/` e abra o arquivo `Main.java`.
-4. Clique no botão **Run** (Executar) que aparece logo acima do método `public static void main(String[] args)` ou pressione `F5`.
+3. No explorador de arquivos, vá até a pasta `ProjetoBiblioteca/src/` e abra o arquivo `Main.java`.
+4. Clique no botão **Run** (Executar) que aparece acima do método `public static void main(String[] args)` ou pressione `F5`.
 5. A interface gráfica do sistema será iniciada automaticamente.
 6. *(Opcional)* Para preencher a base de dados com exemplos de teste, abra o arquivo `PopulateDB.java` dentro de `ProjetoBiblioteca/src/` e clique em **Run**.
 
