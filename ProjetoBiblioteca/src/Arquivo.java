@@ -231,7 +231,26 @@ public class Arquivo<T extends Registro> {
         return -1;
     }
 
+    public java.util.List<T> readAll() throws Exception {
+        java.util.List<T> lista = new java.util.ArrayList<>();
+        arquivo.seek(TAM_CABECALHO);
+        long len = arquivo.length();
+        while (arquivo.getFilePointer() < len) {
+            byte lapide = arquivo.readByte();
+            short tamanho = arquivo.readShort();
+            byte[] dados = new byte[tamanho];
+            arquivo.readFully(dados);
+            if (lapide == ' ') {
+                T obj = construtor.newInstance();
+                obj.fromByteArray(dados);
+                lista.add(obj);
+            }
+        }
+        return lista;
+    }
+
     public void close() throws Exception {
-        arquivo.close();
+        if (arquivo != null) arquivo.close();
+        if (indicePrimario != null) indicePrimario.close();
     }
 }

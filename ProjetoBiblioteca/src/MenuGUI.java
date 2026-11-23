@@ -38,7 +38,7 @@ public class MenuGUI extends JFrame {
         UIManager.put("TextField.caretForeground", Color.WHITE);
 
         setTitle("Sistema de Gerenciamento da Biblioteca");
-        setSize(450, 550);
+        setSize(450, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setBackground(corFundo);
@@ -67,7 +67,7 @@ public class MenuGUI extends JFrame {
         lblTitulo.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0)); 
         add(lblTitulo, BorderLayout.NORTH);
 
-        JPanel panelBotoes = new JPanel(new GridLayout(5, 1, 10, 10));
+        JPanel panelBotoes = new JPanel(new GridLayout(6, 1, 10, 10));
         panelBotoes.setBackground(corFundo);
         panelBotoes.setBorder(BorderFactory.createEmptyBorder(0, 40, 30, 40)); 
 
@@ -75,10 +75,11 @@ public class MenuGUI extends JFrame {
         JButton btnUsuarios = new JButton("2 - Gerenciar Usuários");
         JButton btnAutores = new JButton("3 - Gerenciar Autores");
         JButton btnEmprestimos = new JButton("4 - Gerenciar Empréstimos");
+        JButton btnBackup = new JButton("5 - Backup e Restauração (LZW)");
         JButton btnSair = new JButton("0 - Sair");
 
         // Estilizando botões principais
-        JButton[] botoes = {btnLivros, btnUsuarios, btnAutores, btnEmprestimos, btnSair};
+        JButton[] botoes = {btnLivros, btnUsuarios, btnAutores, btnEmprestimos, btnBackup, btnSair};
         for (JButton btn : botoes) {
             btn.setBackground(corDestaque);
             btn.setForeground(Color.WHITE);
@@ -93,6 +94,7 @@ public class MenuGUI extends JFrame {
         btnUsuarios.addActionListener(e -> menuUsuarios());
         btnAutores.addActionListener(e -> menuAutores());
         btnEmprestimos.addActionListener(e -> menuEmprestimos());
+        btnBackup.addActionListener(e -> menuBackup());
         btnSair.addActionListener(e -> System.exit(0));
     }
 
@@ -100,7 +102,7 @@ public class MenuGUI extends JFrame {
     // LIVROS
     // =====================================================
     private void menuLivros() {
-        String[] opcoes = {"Adicionar Livro", "Buscar Livro", "Atualizar Livro", "Excluir Livro", "Listar por Autor", "Vincular Autor", "Desvincular Autor", "Voltar"};
+        String[] opcoes = {"Adicionar Livro", "Buscar Livro", "Atualizar Livro", "Excluir Livro", "Listar por Autor", "Pesquisar por Título (KMP)", "Vincular Autor", "Desvincular Autor", "Voltar"};
         int escolha = JOptionPane.showOptionDialog(this, 
                 "Escolha uma opção para Livros:", "Gerenciar Livros", 
                 JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
@@ -189,9 +191,37 @@ public class MenuGUI extends JFrame {
                     }
                     break;
 
-                case 5: // Vincular Autor ao Livro
-                case 6: // Desvincular Autor do Livro
-                    boolean vincular = (escolha == 5);
+                case 5: // Pesquisar por Título (KMP)
+                    String padrao = JOptionPane.showInputDialog(this, "Digite o padrão textual a pesquisar no título (Algoritmo KMP):");
+                    if (padrao != null && !padrao.trim().isEmpty()) {
+                        List<Livro> encontrados = livroDAO.buscarPorTituloKMP(padrao.trim());
+                        if (encontrados.isEmpty()) {
+                            JOptionPane.showMessageDialog(this, "Nenhum livro encontrado com o padrão: \"" + padrao + "\"");
+                        } else {
+                            StringBuilder sb = new StringBuilder("=== Livros Encontrados (KMP: \"" + padrao + "\") ===\n\n");
+                            for (Livro l : encontrados) {
+                                int pos = KMP.buscar(l.getTitulo(), padrao.trim());
+                                sb.append("ID: ").append(l.getId()).append(" | ").append(l.getTitulo()).append("\n");
+                                sb.append("Posição no título: caractere ").append(pos).append("\n");
+                                sb.append("Autor(es): ").append(nomesAutores(l.getId())).append("\n");
+                                sb.append("Categorias: ").append(l.getCategorias()).append("\n");
+                                sb.append("Avaliação: ").append(l.getAvaliacao()).append(" | Preço: R$ ").append(String.format("%.2f", l.getPreco())).append("\n");
+                                sb.append("--------------------------------------------------\n");
+                            }
+                            sb.append("Total de registros localizados: ").append(encontrados.size());
+
+                            JTextArea ta = new JTextArea(sb.toString(), 15, 38);
+                            ta.setEditable(false);
+                            ta.setFont(new Font("Monospaced", Font.PLAIN, 12));
+                            JScrollPane sp = new JScrollPane(ta);
+                            JOptionPane.showMessageDialog(this, sp, "Resultado da Pesquisa KMP", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
+                    break;
+
+                case 6: // Vincular Autor ao Livro
+                case 7: // Desvincular Autor do Livro
+                    boolean vincular = (escolha == 6);
                     String idLivroVStr = JOptionPane.showInputDialog("ID do Livro:");
                     if (idLivroVStr == null || idLivroVStr.trim().isEmpty()) return;
                     int idLivroV = Integer.parseInt(idLivroVStr.trim());
@@ -461,5 +491,72 @@ public class MenuGUI extends JFrame {
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erro: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    // =====================================================
+    // BACKUP E RESTAURAÇÃO (LZW) - FASE IV
+    // =====================================================
+    private void menuBackup() {
+        String[] opcoes = {"Criar Backup Completo (LZW)", "Restaurar Backup Completo (LZW)", "Voltar"};
+        int escolha = JOptionPane.showOptionDialog(this, 
+                "Escolha uma opção de Backup:", "Backup e Restauração LZW", 
+                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
+                null, opcoes, opcoes[0]);
+
+        try {
+            java.io.File pastaDados = new java.io.File("./dados");
+            java.io.File arquivoBackup = new java.io.File("./backup_biblioteca.lzw");
+
+            switch (escolha) {
+                case 0: // Criar Backup
+                    BackupService.ResultadoBackup res = BackupService.criarBackup(pastaDados, arquivoBackup);
+                    JOptionPane.showMessageDialog(this, res.toString(), "Backup Concluído", JOptionPane.INFORMATION_MESSAGE);
+                    break;
+
+                case 1: // Restaurar Backup
+                    if (!arquivoBackup.exists()) {
+                        JOptionPane.showMessageDialog(this, "Arquivo de backup não encontrado: " + arquivoBackup.getAbsolutePath(), "Erro", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    int conf = JOptionPane.showConfirmDialog(this, 
+                            "A restauração irá sobrescrever todos os arquivos da pasta dados com o backup.\nDeseja continuar?",
+                            "Confirmar Restauração", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                    if (conf != JOptionPane.YES_OPTION) return;
+
+                    fecharDAOs();
+                    int totalRestaurados = BackupService.restaurarBackup(arquivoBackup, pastaDados);
+                    reinicializarDAOs();
+
+                    JOptionPane.showMessageDialog(this, 
+                            "Restauração concluída com sucesso via LZW!\n\n" +
+                            "Total de arquivos restaurados: " + totalRestaurados + "\n" +
+                            "O banco de dados e os índices foram recarregados e estão operacionais.", 
+                            "Restauração Concluída", JOptionPane.INFORMATION_MESSAGE);
+                    break;
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Erro no processo de backup/restauração: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            try {
+                reinicializarDAOs();
+            } catch (Exception ignored) {}
+        }
+    }
+
+    private void fecharDAOs() {
+        try { if (livroDAO != null) livroDAO.close(); } catch (Exception ignored) {}
+        try { if (usuarioDAO != null) usuarioDAO.close(); } catch (Exception ignored) {}
+        try { if (autorDAO != null) autorDAO.close(); } catch (Exception ignored) {}
+        try { if (emprestimoDAO != null) emprestimoDAO.close(); } catch (Exception ignored) {}
+        try { if (autoriaDAO != null) autoriaDAO.close(); } catch (Exception ignored) {}
+    }
+
+    private void reinicializarDAOs() throws Exception {
+        fecharDAOs();
+        livroDAO = new LivroDAO();
+        usuarioDAO = new UsuarioDAO();
+        autorDAO = new AutorDAO();
+        emprestimoDAO = new EmprestimoDAO();
+        autoriaDAO = new AutoriaDAO();
     }
 }

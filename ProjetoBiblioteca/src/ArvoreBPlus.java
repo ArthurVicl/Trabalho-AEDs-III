@@ -328,6 +328,10 @@ public class ArvoreBPlus {
         }
     }
 
+    public void close() throws Exception {
+        if (arquivo != null) arquivo.close();
+    }
+
     private class Elemento {
         int chave; // Representa a Chave Estrangeira (ex: idAutor)
         int valor; // Representa a Chave Primária (ex: idLivro)

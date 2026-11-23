@@ -11,6 +11,10 @@ O sistema é uma aplicação de gerenciamento de biblioteca desenvolvida em **Ja
 
 Na **Fase III**, foi implementado o relacionamento **N:N (Autoria)** entre `Autor` e `Livro`, com arquivo intermediário binário e indexação bidirecional por Árvores B+.
 
+Na **Fase IV**, foram implementados:
+- **Backup e Restauração com LZW:** Compactação integral de todos os arquivos de dados e índices em um único arquivo de backup (`backup_biblioteca.lzw`) com recuperação completa.
+- **Casamento de Padrões com KMP:** Algoritmo Knuth-Morris-Pratt implementado do zero para busca textual eficiente de livros por título, sem uso de métodos prontos da linguagem.
+
 ---
 
 ## Arquitetura e Estruturas de Dados
@@ -22,6 +26,8 @@ Na **Fase III**, foi implementado o relacionamento **N:N (Autoria)** entre `Auto
 - **Indexação Secundária / Relacionamento N:N:** **Árvores B+** (`ArvoreBPlus.java`) mantidas em memória secundária (`.btree`):
   - `indice_autoria_autor_livro`: Chave = `idAutor`, Valor = `idAutoria`
   - `indice_autoria_livro_autor`: Chave = `idLivro`, Valor = `idAutoria`
+- **Compactação e Backup:** Algoritmo **LZW** (`LZW.java`, `BackupService.java`) para gerar backup completo e restauração dos arquivos da base de dados e índices.
+- **Casamento de Padrões:** Algoritmo **KMP** (`KMP.java`) para pesquisa de padrões textuais em títulos de livros.
 
 ---
 
@@ -108,6 +114,9 @@ Trabalho-AEDs-III/
     │   ├── Arquivo.java / Registro.java
     │   ├── ArvoreBPlus.java       # Implementação da Árvore B+
     │   ├── HashExtensivel.java    # Implementação do Hashing Extensível
+    │   ├── KMP.java               # Casamento de padrões Knuth-Morris-Pratt
+    │   ├── LZW.java               # Compactação e descompactação LZW
+    │   ├── BackupService.java     # Gerenciamento de backup e restauração
     │   ├── OrdenacaoExternaUsuario.java # Intercalação Balanceada
     │   └── PopulateDB.java        # Script de carga inicial de testes
     └── logo_biblioteca.png        # Imagem utilizada na interface

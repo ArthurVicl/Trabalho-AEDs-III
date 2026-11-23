@@ -103,4 +103,10 @@ public class AutoriaDAO {
             indiceLivroAutor.delete(idLivro, idAutoria);
         }
     }
+
+    public void close() throws Exception {
+        if (arqAutoria != null) arqAutoria.close();
+        if (indiceAutorLivro != null) indiceAutorLivro.close();
+        if (indiceLivroAutor != null) indiceLivroAutor.close();
+    }
 }

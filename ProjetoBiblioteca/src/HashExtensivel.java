@@ -203,6 +203,11 @@ public class HashExtensivel {
         }
     }
 
+    public void close() throws Exception {
+        if (arqDiretorio != null) arqDiretorio.close();
+        if (arqCestos != null) arqCestos.close();
+    }
+
     // ==========================================
     // CLASSES INTERNAS AUXILIARES
     // ==========================================
