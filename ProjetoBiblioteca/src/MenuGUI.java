@@ -496,6 +496,35 @@ public class MenuGUI extends JFrame {
     // =====================================================
     // BACKUP E RESTAURAÇÃO (LZW) - FASE IV
     // =====================================================
+    public static class ResultadoBackup {
+        public long tamanhoOriginal;
+        public long tamanhoCompactado;
+        public double taxaCompressao;
+        public int totalArquivos;
+        public String caminhoArquivoBackup;
+
+        public ResultadoBackup(long original, long compactado, double taxa, int total, String caminho) {
+            this.tamanhoOriginal = original;
+            this.tamanhoCompactado = compactado;
+            this.taxaCompressao = taxa;
+            this.totalArquivos = total;
+            this.caminhoArquivoBackup = caminho;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                "Backup gerado com sucesso via LZW!\n\n" +
+                "Arquivo gerado: %s\n" +
+                "Arquivos incluídos: %d\n" +
+                "Tamanho original dos arquivos: %,d bytes\n" +
+                "Tamanho do arquivo compactado: %,d bytes\n" +
+                "Taxa de compressão: %.2f%%",
+                caminhoArquivoBackup, totalArquivos, tamanhoOriginal, tamanhoCompactado, taxaCompressao
+            );
+        }
+    }
+
     private void menuBackup() {
         String[] opcoes = {"Criar Backup Completo (LZW)", "Restaurar Backup Completo (LZW)", "Voltar"};
         int escolha = JOptionPane.showOptionDialog(this, 
@@ -509,7 +538,7 @@ public class MenuGUI extends JFrame {
 
             switch (escolha) {
                 case 0: // Criar Backup
-                    BackupService.ResultadoBackup res = BackupService.criarBackup(pastaDados, arquivoBackup);
+                    ResultadoBackup res = executarCriarBackup(pastaDados, arquivoBackup);
                     JOptionPane.showMessageDialog(this, res.toString(), "Backup Concluído", JOptionPane.INFORMATION_MESSAGE);
                     break;
 
@@ -525,7 +554,7 @@ public class MenuGUI extends JFrame {
                     if (conf != JOptionPane.YES_OPTION) return;
 
                     fecharDAOs();
-                    int totalRestaurados = BackupService.restaurarBackup(arquivoBackup, pastaDados);
+                    int totalRestaurados = executarRestaurarBackup(arquivoBackup, pastaDados);
                     reinicializarDAOs();
 
                     JOptionPane.showMessageDialog(this, 
@@ -540,6 +569,120 @@ public class MenuGUI extends JFrame {
             try {
                 reinicializarDAOs();
             } catch (Exception ignored) {}
+        }
+    }
+
+    private ResultadoBackup executarCriarBackup(java.io.File pastaDados, java.io.File arquivoDestino) throws Exception {
+        if (!pastaDados.exists() || !pastaDados.isDirectory()) {
+            throw new java.io.IOException("Diretório de dados não encontrado: " + pastaDados.getAbsolutePath());
+        }
+
+        java.util.List<java.io.File> arquivos = new java.util.ArrayList<>();
+        listarArquivosRecursivo(pastaDados, arquivos);
+
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        java.io.DataOutputStream dos = new java.io.DataOutputStream(baos);
+
+        long tamanhoOriginalTotal = 0;
+        String caminhoBase = pastaDados.getCanonicalPath();
+
+        for (java.io.File f : arquivos) {
+            String caminhoAbs = f.getCanonicalPath();
+            String relativo = caminhoAbs.substring(caminhoBase.length());
+            if (relativo.startsWith(java.io.File.separator)) {
+                relativo = relativo.substring(1);
+            }
+            relativo = relativo.replace('\\', '/');
+
+            byte[] conteudo = lerBytesArquivo(f);
+            tamanhoOriginalTotal += conteudo.length;
+
+            dos.writeUTF(relativo);
+            dos.writeInt(conteudo.length);
+            dos.write(conteudo);
+        }
+
+        dos.writeUTF("");
+        dos.flush();
+
+        byte[] dadosEmpacotados = baos.toByteArray();
+        byte[] dadosCompactados = LZW.comprimir(dadosEmpacotados);
+
+        if (arquivoDestino.getParentFile() != null) {
+            arquivoDestino.getParentFile().mkdirs();
+        }
+        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(arquivoDestino)) {
+            fos.write(dadosCompactados);
+        }
+
+        long tamanhoCompactado = arquivoDestino.length();
+        double taxa = 0.0;
+        if (tamanhoOriginalTotal > 0) {
+            taxa = (1.0 - ((double) tamanhoCompactado / (double) tamanhoOriginalTotal)) * 100.0;
+        }
+
+        return new ResultadoBackup(tamanhoOriginalTotal, tamanhoCompactado, taxa, arquivos.size(), arquivoDestino.getName());
+    }
+
+    private int executarRestaurarBackup(java.io.File arquivoBackup, java.io.File pastaDestinoDados) throws Exception {
+        if (!arquivoBackup.exists() || !arquivoBackup.isFile()) {
+            throw new java.io.IOException("Arquivo de backup não encontrado: " + arquivoBackup.getAbsolutePath());
+        }
+
+        byte[] bytesCompactados = lerBytesArquivo(arquivoBackup);
+        byte[] dadosDescompactados = LZW.descomprimir(bytesCompactados);
+
+        java.io.ByteArrayInputStream bais = new java.io.ByteArrayInputStream(dadosDescompactados);
+        java.io.DataInputStream dis = new java.io.DataInputStream(bais);
+
+        int restaurados = 0;
+        while (true) {
+            String relativo = dis.readUTF();
+            if (relativo == null || relativo.isEmpty()) {
+                break;
+            }
+
+            int tamanho = dis.readInt();
+            byte[] conteudo = new byte[tamanho];
+            dis.readFully(conteudo);
+
+            java.io.File destFile = new java.io.File(pastaDestinoDados, relativo);
+            if (destFile.getParentFile() != null) {
+                destFile.getParentFile().mkdirs();
+            }
+
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(destFile)) {
+                fos.write(conteudo);
+            }
+            restaurados++;
+        }
+
+        return restaurados;
+    }
+
+    private static void listarArquivosRecursivo(java.io.File dir, java.util.List<java.io.File> resultado) {
+        java.io.File[] lista = dir.listFiles();
+        if (lista != null) {
+            for (java.io.File f : lista) {
+                if (f.isDirectory()) {
+                    listarArquivosRecursivo(f, resultado);
+                } else if (f.isFile()) {
+                    resultado.add(f);
+                }
+            }
+        }
+    }
+
+    private static byte[] lerBytesArquivo(java.io.File f) throws java.io.IOException {
+        try (java.io.FileInputStream fis = new java.io.FileInputStream(f)) {
+            byte[] b = new byte[(int) f.length()];
+            int lidos = 0;
+            while (lidos < b.length) {
+                int r = fis.read(b, lidos, b.length - lidos);
+                if (r == -1) break;
+                lidos += r;
+            }
+            return b;
         }
     }
 
