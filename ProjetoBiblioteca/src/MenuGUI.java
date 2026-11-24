@@ -1,8 +1,12 @@
 import java.awt.*;
+import java.io.*;
+import java.util.*;
 import java.util.List;
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class MenuGUI extends JFrame {
+    private static final long serialVersionUID = 1L;
 
     private LivroDAO livroDAO;
     private UsuarioDAO usuarioDAO;
@@ -701,5 +705,222 @@ public class MenuGUI extends JFrame {
         autorDAO = new AutorDAO();
         emprestimoDAO = new EmprestimoDAO();
         autoriaDAO = new AutoriaDAO();
+    }
+
+    // =====================================================
+    // ALGORITMO KMP (Knuth-Morris-Pratt)
+    // =====================================================
+    public static class KMP {
+        public static int[] computarLPS(String padrao) {
+            int m = padrao.length();
+            int[] lps = new int[m];
+            int len = 0;
+            int i = 1;
+            lps[0] = 0;
+
+            while (i < m) {
+                if (padrao.charAt(i) == padrao.charAt(len)) {
+                    len++;
+                    lps[i] = len;
+                    i++;
+                } else {
+                    if (len != 0) {
+                        len = lps[len - 1];
+                    } else {
+                        lps[i] = 0;
+                        i++;
+                    }
+                }
+            }
+            return lps;
+        }
+
+        public static int buscar(String texto, String padrao) {
+            if (padrao == null || padrao.isEmpty()) return 0;
+            if (texto == null || texto.isEmpty()) return -1;
+
+            String t = toLower(texto);
+            String p = toLower(padrao);
+
+            int n = t.length();
+            int m = p.length();
+            if (m > n) return -1;
+
+            int[] lps = computarLPS(p);
+
+            int i = 0;
+            int j = 0;
+
+            while (i < n) {
+                if (p.charAt(j) == t.charAt(i)) {
+                    i++;
+                    j++;
+                }
+
+                if (j == m) {
+                    return i - j;
+                } else if (i < n && p.charAt(j) != t.charAt(i)) {
+                    if (j != 0) {
+                        j = lps[j - 1];
+                    } else {
+                        i++;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        public static boolean contem(String texto, String padrao) {
+            return buscar(texto, padrao) != -1;
+        }
+
+        private static String toLower(String s) {
+            if (s == null) return null;
+            char[] chars = new char[s.length()];
+            for (int i = 0; i < s.length(); i++) {
+                chars[i] = Character.toLowerCase(s.charAt(i));
+            }
+            return new String(chars);
+        }
+    }
+
+    // =====================================================
+    // ALGORITMO LZW (Lempel-Ziv-Welch)
+    // =====================================================
+    public static class LZW {
+        private static final int MAX_CODIGOS = 4096;
+        private static final int CODIGOS_INICIAIS = 256;
+
+        public static byte[] comprimir(byte[] entrada) throws IOException {
+            if (entrada == null || entrada.length == 0) return new byte[0];
+
+            Map<Long, Integer> dicionario = new HashMap<>();
+            int proximoCodigo = CODIGOS_INICIAIS;
+
+            List<Integer> codigos = new ArrayList<>();
+            int p = -1;
+
+            for (int i = 0; i < entrada.length; i++) {
+                int b = entrada[i] & 0xFF;
+                if (p == -1) {
+                    p = b;
+                } else {
+                    long chave = ((long) p << 8) | b;
+                    if (dicionario.containsKey(chave)) {
+                        p = dicionario.get(chave);
+                    } else {
+                        codigos.add(p);
+                        if (proximoCodigo < MAX_CODIGOS) {
+                            dicionario.put(chave, proximoCodigo++);
+                        }
+                        p = b;
+                    }
+                }
+            }
+
+            if (p != -1) codigos.add(p);
+
+            return empacotar12Bits(codigos);
+        }
+
+        public static byte[] descomprimir(byte[] compactado) throws IOException {
+            if (compactado == null || compactado.length == 0) return new byte[0];
+
+            List<Integer> codigos = desempacotar12Bits(compactado);
+            if (codigos.isEmpty()) return new byte[0];
+
+            byte[][] dicionario = new byte[MAX_CODIGOS][];
+            for (int i = 0; i < CODIGOS_INICIAIS; i++) {
+                dicionario[i] = new byte[] { (byte) i };
+            }
+            int proximoCodigo = CODIGOS_INICIAIS;
+
+            ByteArrayOutputStream saida = new ByteArrayOutputStream();
+
+            int codigoAntigo = codigos.get(0);
+            saida.write(dicionario[codigoAntigo]);
+
+            for (int i = 1; i < codigos.size(); i++) {
+                int codigoAtual = codigos.get(i);
+                byte[] entrada;
+
+                if (codigoAtual < proximoCodigo) {
+                    entrada = dicionario[codigoAtual];
+                } else if (codigoAtual == proximoCodigo) {
+                    byte[] cadeiaAntiga = dicionario[codigoAntigo];
+                    entrada = new byte[cadeiaAntiga.length + 1];
+                    System.arraycopy(cadeiaAntiga, 0, entrada, 0, cadeiaAntiga.length);
+                    entrada[cadeiaAntiga.length] = cadeiaAntiga[0];
+                } else {
+                    throw new IOException("Código LZW inválido: " + codigoAtual);
+                }
+
+                saida.write(entrada);
+
+                if (proximoCodigo < MAX_CODIGOS) {
+                    byte[] cadeiaAntiga = dicionario[codigoAntigo];
+                    byte[] novaEntrada = new byte[cadeiaAntiga.length + 1];
+                    System.arraycopy(cadeiaAntiga, 0, novaEntrada, 0, cadeiaAntiga.length);
+                    novaEntrada[cadeiaAntiga.length] = entrada[0];
+                    dicionario[proximoCodigo++] = novaEntrada;
+                }
+
+                codigoAntigo = codigoAtual;
+            }
+
+            return saida.toByteArray();
+        }
+
+        private static byte[] empacotar12Bits(List<Integer> codigos) throws IOException {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(baos);
+            dos.writeInt(codigos.size());
+
+            int buffer = 0;
+            int bitsNoBuffer = 0;
+
+            for (int codigo : codigos) {
+                buffer = (buffer << 12) | (codigo & 0xFFF);
+                bitsNoBuffer += 12;
+
+                while (bitsNoBuffer >= 8) {
+                    bitsNoBuffer -= 8;
+                    baos.write((buffer >> bitsNoBuffer) & 0xFF);
+                }
+            }
+
+            if (bitsNoBuffer > 0) {
+                baos.write((buffer << (8 - bitsNoBuffer)) & 0xFF);
+            }
+
+            return baos.toByteArray();
+        }
+
+        private static List<Integer> desempacotar12Bits(byte[] compactado) throws IOException {
+            ByteArrayInputStream bais = new ByteArrayInputStream(compactado);
+            DataInputStream dis = new DataInputStream(bais);
+
+            int totalCodigos = dis.readInt();
+            List<Integer> codigos = new ArrayList<>(totalCodigos);
+
+            int buffer = 0;
+            int bitsNoBuffer = 0;
+
+            for (int i = 0; i < totalCodigos; i++) {
+                while (bitsNoBuffer < 12) {
+                    int b = bais.read();
+                    if (b == -1) throw new IOException("Fim inesperado dos dados LZW.");
+                    buffer = (buffer << 8) | (b & 0xFF);
+                    bitsNoBuffer += 8;
+                }
+
+                bitsNoBuffer -= 12;
+                int codigo = (buffer >> bitsNoBuffer) & 0xFFF;
+                codigos.add(codigo);
+            }
+
+            return codigos;
+        }
     }
 }
