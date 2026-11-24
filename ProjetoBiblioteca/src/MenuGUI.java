@@ -106,11 +106,54 @@ public class MenuGUI extends JFrame {
     // LIVROS
     // =====================================================
     private void menuLivros() {
-        String[] opcoes = {"Adicionar Livro", "Buscar Livro", "Atualizar Livro", "Excluir Livro", "Listar por Autor", "Pesquisar por Título (KMP)", "Vincular Autor", "Desvincular Autor", "Voltar"};
-        int escolha = JOptionPane.showOptionDialog(this, 
-                "Escolha uma opção para Livros:", "Gerenciar Livros", 
-                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
-                null, opcoes, opcoes[0]);
+        JDialog dialog = new JDialog(this, "Gerenciar Livros", true);
+        dialog.getContentPane().setBackground(new Color(30, 30, 30));
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(420, 520);
+        dialog.setLocationRelativeTo(this);
+
+        JLabel lbl = new JLabel("GERENCIAR LIVROS", SwingConstants.CENTER);
+        lbl.setFont(new Font("Impact", Font.ITALIC, 20));
+        lbl.setForeground(new Color(50, 205, 50));
+        lbl.setBorder(BorderFactory.createEmptyBorder(15, 0, 5, 0));
+        dialog.add(lbl, BorderLayout.NORTH);
+
+        JPanel panel = new JPanel(new GridLayout(9, 1, 6, 6));
+        panel.setBackground(new Color(30, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 35, 20, 35));
+
+        String[] opcoes = {
+            "1. Adicionar Livro",
+            "2. Buscar Livro",
+            "3. Atualizar Livro",
+            "4. Excluir Livro",
+            "5. Listar por Autor",
+            "6. Pesquisar por Título (KMP)",
+            "7. Vincular Autor ao Livro",
+            "8. Desvincular Autor do Livro",
+            "0. Voltar"
+        };
+
+        for (int i = 0; i < opcoes.length; i++) {
+            final int index = i;
+            JButton btn = new JButton(opcoes[i]);
+            btn.setBackground(new Color(220, 20, 60));
+            btn.setForeground(Color.WHITE);
+            btn.setFont(new Font("Arial", Font.BOLD, 13));
+            btn.setFocusPainted(false);
+            btn.addActionListener(e -> {
+                dialog.dispose();
+                executarAcaoLivro(index);
+            });
+            panel.add(btn);
+        }
+
+        dialog.add(panel, BorderLayout.CENTER);
+        dialog.setVisible(true);
+    }
+
+    private void executarAcaoLivro(int escolha) {
+        if (escolha == 8) return; // Voltar
 
         try {
             switch (escolha) {
