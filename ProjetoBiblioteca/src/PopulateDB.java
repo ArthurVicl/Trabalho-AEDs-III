@@ -35,6 +35,7 @@ public class PopulateDB {
             // Inserir Empréstimos
             emprestimoDAO.create(new Emprestimo(idJoao, idSenhor, "01/10/2026", "15/10/2026", 0.0f));
             emprestimoDAO.create(new Emprestimo(idMaria, idHarry, "05/10/2026", "20/10/2026", 5.50f));
+            emprestimoDAO.create(new Emprestimo(idCarlos, idHobbit, "10/10/2026", "25/10/2026", 0.0f));
             
             System.out.println("Exemplos criados com sucesso!");
             

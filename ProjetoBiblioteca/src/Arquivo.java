@@ -4,11 +4,11 @@ import java.lang.reflect.Constructor;
 
 public class Arquivo<T extends Registro> {
     private static final int TAM_CABECALHO = 12;
-    private RandomAccessFile arquivo;
-    private String nomeArquivo;
-    private Constructor<T> construtor;
+    private final RandomAccessFile arquivo;
+    private final String nomeArquivo;
+    private final Constructor<T> construtor;
 
-    private HashExtensivel indicePrimario;
+    private final HashExtensivel indicePrimario;
 
     public Arquivo(String nomeArquivo, Constructor<T> construtor) throws Exception {
         File diretorio = new File("./dados");

@@ -1,6 +1,6 @@
 public class EmprestimoDAO {
 
-    private Arquivo<Emprestimo> arquivo;
+    private final Arquivo<Emprestimo> arquivo;
 
     public EmprestimoDAO() throws Exception {
         arquivo = new Arquivo<>(

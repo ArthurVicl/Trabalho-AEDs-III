@@ -1,6 +1,6 @@
 public class UsuarioDAO {
 
-    private Arquivo<Usuario> arquivo;
+    private final Arquivo<Usuario> arquivo;
 
     public UsuarioDAO() throws Exception {
         arquivo = new Arquivo<>(

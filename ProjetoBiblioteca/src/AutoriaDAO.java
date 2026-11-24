@@ -2,9 +2,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AutoriaDAO {
-    private Arquivo<Autoria> arqAutoria;
-    private ArvoreBPlus indiceAutorLivro; // Chave: idAutor, Valor: idAutoria
-    private ArvoreBPlus indiceLivroAutor; // Chave: idLivro, Valor: idAutoria
+    private final Arquivo<Autoria> arqAutoria;
+    private final ArvoreBPlus indiceAutorLivro; // Chave: idAutor, Valor: idAutoria
+    private final ArvoreBPlus indiceLivroAutor; // Chave: idLivro, Valor: idAutoria
 
     public AutoriaDAO() throws Exception {
         arqAutoria = new Arquivo<>("autorias", Autoria.class.getConstructor());

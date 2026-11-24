@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 public class HashExtensivel {
 
-    private String nomeArquivoDiretorio;
-    private String nomeArquivoCestos;
-    private int capacidadeCesto;
-    private RandomAccessFile arqDiretorio;
-    private RandomAccessFile arqCestos;
+    private final String nomeArquivoDiretorio;
+    private final String nomeArquivoCestos;
+    private final int capacidadeCesto;
+    private final RandomAccessFile arqDiretorio;
+    private final RandomAccessFile arqCestos;
     private int profundidadeGlobal;
 
     public HashExtensivel(String nomeArquivo, int capacidadeCesto) throws Exception {

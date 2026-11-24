@@ -1,6 +1,6 @@
 public class AutorDAO {
 
-    private Arquivo<Autor> arquivo;
+    private final Arquivo<Autor> arquivo;
 
     public AutorDAO() throws Exception {
         arquivo = new Arquivo<>(

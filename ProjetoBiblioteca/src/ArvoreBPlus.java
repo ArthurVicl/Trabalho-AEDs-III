@@ -5,9 +5,9 @@ import java.util.List;
 
 public class ArvoreBPlus {
 
-    private String nomeArquivo;
-    private RandomAccessFile arquivo;
-    private int ordem;
+    private final String nomeArquivo;
+    private final RandomAccessFile arquivo;
+    private final int ordem;
     private long enderecoRaiz;
 
     public ArvoreBPlus(String nome, int ordem) throws Exception {

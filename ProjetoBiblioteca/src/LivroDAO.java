@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LivroDAO {
-    private Arquivo<Livro> arqLivros;
+    private final Arquivo<Livro> arqLivros;
 
     public LivroDAO() throws Exception {
         arqLivros = new Arquivo<>("livros", Livro.class.getConstructor());
