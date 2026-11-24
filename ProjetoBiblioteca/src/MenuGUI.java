@@ -318,11 +318,51 @@ public class MenuGUI extends JFrame {
     // USUÁRIOS
     // =====================================================
     private void menuUsuarios() {
-        String[] opcoes = {"Adicionar Usuário", "Buscar Usuário", "Atualizar Usuário", "Excluir Usuário", "Ordenar (Externa)", "Voltar"};
-        int escolha = JOptionPane.showOptionDialog(this, 
-                "Escolha uma opção para Usuários:", "Gerenciar Usuários", 
-                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
-                null, opcoes, opcoes[0]);
+        JDialog dialog = new JDialog(this, "Gerenciar Usuários", true);
+        dialog.getContentPane().setBackground(new Color(30, 30, 30));
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(420, 420);
+        dialog.setLocationRelativeTo(this);
+
+        JLabel lbl = new JLabel("GERENCIAR USUÁRIOS", SwingConstants.CENTER);
+        lbl.setFont(new Font("Impact", Font.ITALIC, 20));
+        lbl.setForeground(new Color(50, 205, 50));
+        lbl.setBorder(BorderFactory.createEmptyBorder(15, 0, 5, 0));
+        dialog.add(lbl, BorderLayout.NORTH);
+
+        JPanel panel = new JPanel(new GridLayout(6, 1, 6, 6));
+        panel.setBackground(new Color(30, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 35, 20, 35));
+
+        String[] opcoes = {
+            "1. Adicionar Usuário",
+            "2. Buscar Usuário",
+            "3. Atualizar Usuário",
+            "4. Excluir Usuário",
+            "5. Ordenação Externa",
+            "0. Voltar"
+        };
+
+        for (int i = 0; i < opcoes.length; i++) {
+            final int index = i;
+            JButton btn = new JButton(opcoes[i]);
+            btn.setBackground(new Color(220, 20, 60));
+            btn.setForeground(Color.WHITE);
+            btn.setFont(new Font("Arial", Font.BOLD, 13));
+            btn.setFocusPainted(false);
+            btn.addActionListener(e -> {
+                dialog.dispose();
+                executarAcaoUsuario(index);
+            });
+            panel.add(btn);
+        }
+
+        dialog.add(panel, BorderLayout.CENTER);
+        dialog.setVisible(true);
+    }
+
+    private void executarAcaoUsuario(int escolha) {
+        if (escolha == 5) return; // Voltar
 
         try {
             switch (escolha) {
@@ -391,11 +431,50 @@ public class MenuGUI extends JFrame {
     // AUTORES
     // =====================================================
     private void menuAutores() {
-        String[] opcoes = {"Adicionar Autor", "Buscar Autor", "Atualizar Autor", "Excluir Autor", "Voltar"};
-        int escolha = JOptionPane.showOptionDialog(this, 
-                "Escolha uma opção para Autores:", "Gerenciar Autores", 
-                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
-                null, opcoes, opcoes[0]);
+        JDialog dialog = new JDialog(this, "Gerenciar Autores", true);
+        dialog.getContentPane().setBackground(new Color(30, 30, 30));
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(420, 380);
+        dialog.setLocationRelativeTo(this);
+
+        JLabel lbl = new JLabel("GERENCIAR AUTORES", SwingConstants.CENTER);
+        lbl.setFont(new Font("Impact", Font.ITALIC, 20));
+        lbl.setForeground(new Color(50, 205, 50));
+        lbl.setBorder(BorderFactory.createEmptyBorder(15, 0, 5, 0));
+        dialog.add(lbl, BorderLayout.NORTH);
+
+        JPanel panel = new JPanel(new GridLayout(5, 1, 6, 6));
+        panel.setBackground(new Color(30, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 35, 20, 35));
+
+        String[] opcoes = {
+            "1. Adicionar Autor",
+            "2. Buscar Autor",
+            "3. Atualizar Autor",
+            "4. Excluir Autor",
+            "0. Voltar"
+        };
+
+        for (int i = 0; i < opcoes.length; i++) {
+            final int index = i;
+            JButton btn = new JButton(opcoes[i]);
+            btn.setBackground(new Color(220, 20, 60));
+            btn.setForeground(Color.WHITE);
+            btn.setFont(new Font("Arial", Font.BOLD, 13));
+            btn.setFocusPainted(false);
+            btn.addActionListener(e -> {
+                dialog.dispose();
+                executarAcaoAutor(index);
+            });
+            panel.add(btn);
+        }
+
+        dialog.add(panel, BorderLayout.CENTER);
+        dialog.setVisible(true);
+    }
+
+    private void executarAcaoAutor(int escolha) {
+        if (escolha == 4) return; // Voltar
 
         try {
             switch (escolha) {
@@ -458,11 +537,50 @@ public class MenuGUI extends JFrame {
     // EMPRÉSTIMOS
     // =====================================================
     private void menuEmprestimos() {
-        String[] opcoes = {"Adicionar Empréstimo", "Buscar Empréstimo", "Atualizar Empréstimo", "Excluir Empréstimo", "Voltar"};
-        int escolha = JOptionPane.showOptionDialog(this, 
-                "Escolha uma opção para Empréstimos:", "Gerenciar Empréstimos", 
-                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
-                null, opcoes, opcoes[0]);
+        JDialog dialog = new JDialog(this, "Gerenciar Empréstimos", true);
+        dialog.getContentPane().setBackground(new Color(30, 30, 30));
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(420, 380);
+        dialog.setLocationRelativeTo(this);
+
+        JLabel lbl = new JLabel("GERENCIAR EMPRÉSTIMOS", SwingConstants.CENTER);
+        lbl.setFont(new Font("Impact", Font.ITALIC, 20));
+        lbl.setForeground(new Color(50, 205, 50));
+        lbl.setBorder(BorderFactory.createEmptyBorder(15, 0, 5, 0));
+        dialog.add(lbl, BorderLayout.NORTH);
+
+        JPanel panel = new JPanel(new GridLayout(5, 1, 6, 6));
+        panel.setBackground(new Color(30, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 35, 20, 35));
+
+        String[] opcoes = {
+            "1. Adicionar Empréstimo",
+            "2. Buscar Empréstimo",
+            "3. Atualizar Empréstimo",
+            "4. Excluir Empréstimo",
+            "0. Voltar"
+        };
+
+        for (int i = 0; i < opcoes.length; i++) {
+            final int index = i;
+            JButton btn = new JButton(opcoes[i]);
+            btn.setBackground(new Color(220, 20, 60));
+            btn.setForeground(Color.WHITE);
+            btn.setFont(new Font("Arial", Font.BOLD, 13));
+            btn.setFocusPainted(false);
+            btn.addActionListener(e -> {
+                dialog.dispose();
+                executarAcaoEmprestimo(index);
+            });
+            panel.add(btn);
+        }
+
+        dialog.add(panel, BorderLayout.CENTER);
+        dialog.setVisible(true);
+    }
+
+    private void executarAcaoEmprestimo(int escolha) {
+        if (escolha == 4) return; // Voltar
 
         try {
             switch (escolha) {
@@ -573,11 +691,48 @@ public class MenuGUI extends JFrame {
     }
 
     private void menuBackup() {
-        String[] opcoes = {"Criar Backup Completo (LZW)", "Restaurar Backup Completo (LZW)", "Voltar"};
-        int escolha = JOptionPane.showOptionDialog(this, 
-                "Escolha uma opção de Backup:", "Backup e Restauração LZW", 
-                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, 
-                null, opcoes, opcoes[0]);
+        JDialog dialog = new JDialog(this, "Backup e Restauração LZW", true);
+        dialog.getContentPane().setBackground(new Color(30, 30, 30));
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(420, 300);
+        dialog.setLocationRelativeTo(this);
+
+        JLabel lbl = new JLabel("BACKUP E RESTAURAÇÃO (LZW)", SwingConstants.CENTER);
+        lbl.setFont(new Font("Impact", Font.ITALIC, 20));
+        lbl.setForeground(new Color(50, 205, 50));
+        lbl.setBorder(BorderFactory.createEmptyBorder(15, 0, 5, 0));
+        dialog.add(lbl, BorderLayout.NORTH);
+
+        JPanel panel = new JPanel(new GridLayout(3, 1, 6, 6));
+        panel.setBackground(new Color(30, 30, 30));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 35, 20, 35));
+
+        String[] opcoes = {
+            "1. Criar Backup Completo (LZW)",
+            "2. Restaurar Backup Completo (LZW)",
+            "0. Voltar"
+        };
+
+        for (int i = 0; i < opcoes.length; i++) {
+            final int index = i;
+            JButton btn = new JButton(opcoes[i]);
+            btn.setBackground(new Color(220, 20, 60));
+            btn.setForeground(Color.WHITE);
+            btn.setFont(new Font("Arial", Font.BOLD, 13));
+            btn.setFocusPainted(false);
+            btn.addActionListener(e -> {
+                dialog.dispose();
+                executarAcaoBackup(index);
+            });
+            panel.add(btn);
+        }
+
+        dialog.add(panel, BorderLayout.CENTER);
+        dialog.setVisible(true);
+    }
+
+    private void executarAcaoBackup(int escolha) {
+        if (escolha == 2) return; // Voltar
 
         try {
             java.io.File pastaDados = new java.io.File("./dados");
